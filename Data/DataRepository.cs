@@ -33,7 +33,7 @@ namespace backend.Data
             {
                 connection.Open();
                 return connection.QueryFirstOrDefault<AnswerGetResponse>(
-                    @"EXEC dbo.Answer_Get_ByAnswerId @AnswerId = @answerId", new { answerId }
+                    @"EXEC dbo.Answer_Get_ByAnswerId @AnswerId = @AnswerId", new { AnswerId = answerId }
                 );
             }
         }
@@ -44,13 +44,13 @@ namespace backend.Data
             {
                 connection.Open();
                 var question = connection.QueryFirstOrDefault<QuestionGetSingleResponse>(
-                    @"EXEC dbo.Question_GetSingle @QuestionId = @questionId", new { questionId }
+                    @"EXEC dbo.Question_GetSingle @QuestionId = @QuestionId", new { QuestionId = questionId }
                 );
 
                 if (question != null)
                 {
                     question.Answers = connection.Query<AnswerGetResponse>(
-                        @"EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @questionId", new { questionId }
+                        @"EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId", new { QuestionId = questionId }
                     );
                 }
 
@@ -76,7 +76,7 @@ namespace backend.Data
             {
                 connection.Open();
                 return connection.Query<QuestionGetManyResponse>(
-                    @"EXEC dbo.Question_GetMany_BySearch @Search = @search", new { search }
+                    @"EXEC dbo.Question_GetMany_BySearch @Search = @Search", new { Search = search }
                 );
             }
         }
@@ -148,7 +148,7 @@ namespace backend.Data
             {
                 connection.Open();
                 return connection.QueryFirst<bool>(
-                    @"EXEC dbo.Question_Exists @QuestionId = @questionId", new { questionId }
+                    @"EXEC dbo.Question_Exists @QuestionId = @QuestionId", new { QuestionId = questionId }
                 );
             }
         }
