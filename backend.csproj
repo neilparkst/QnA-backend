@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SQLScripts\01-Tables.sql" />
+    <None Remove="SQLScripts\02-Sprocs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SQLScripts\01-Tables.sql" />
+    <EmbeddedResource Include="SQLScripts\02-Sprocs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="dbup" Version="5.0.41" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>

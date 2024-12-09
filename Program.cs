@@ -1,5 +1,7 @@
 namespace backend
 {
+    using DbUp;
+
     public class Program
     {
         public static void Main(string[] args)
@@ -14,6 +16,24 @@ namespace backend
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            // Apply DbUp migrations during startup
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            EnsureDatabase.For.SqlDatabase(connectionString);
+
+            var upgrader = DeployChanges.To
+                .SqlDatabase(connectionString, null)
+                .WithScriptsEmbeddedInAssembly(
+                    System.Reflection.Assembly.GetExecutingAssembly()
+                )
+                .WithTransaction()
+                .Build();
+
+            if (upgrader.IsUpgradeRequired())
+            {
+                upgrader.PerformUpgrade();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
