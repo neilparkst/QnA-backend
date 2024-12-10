@@ -83,5 +83,20 @@ namespace backend.Controllers
             _dataRepository.DeleteQuestion(questionId);
             return NoContent();
         }
+
+        [HttpPost("{questionId}/answer")]
+        public ActionResult<AnswerGetResponse> PostAnswer(int questionId, AnswerPostRequest answerPostRequest)
+        {
+            var questionExists = _dataRepository.QuestionExists(questionId);
+            if (!questionExists)
+            {
+                return NotFound();
+            }
+
+            answerPostRequest.QuestionId = questionId;
+            var savedAnswer = _dataRepository.PostAnswer(answerPostRequest);
+
+            return savedAnswer;
+        }
     }
 }
