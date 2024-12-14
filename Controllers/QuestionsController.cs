@@ -50,7 +50,14 @@ namespace backend.Controllers
         [HttpPost]
         public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostRequest questionPostRequest)
         {
-            var savedQuestion = _dataRepository.PostQuestion(questionPostRequest);
+            var savedQuestion = _dataRepository.PostQuestion(new QuestionPostFullRequest
+            {
+                Title = questionPostRequest.Title,
+                Content = questionPostRequest.Content,
+                UserId = "1",
+                UserName = "bob.test@test.com",
+                Created = DateTime.UtcNow
+            });
 
             return CreatedAtAction(nameof(GetQuestion), new { questionId = savedQuestion.QuestionId }, savedQuestion);
         }
@@ -92,9 +99,14 @@ namespace backend.Controllers
             {
                 return NotFound();
             }
-
-            answerPostRequest.QuestionId = questionId;
-            var savedAnswer = _dataRepository.PostAnswer(answerPostRequest);
+            var savedAnswer = _dataRepository.PostAnswer(new AnswerPostFullRequest
+            {
+                QuestionId = questionId,
+                Content = answerPostRequest.Content,
+                UserId = "1",
+                UserName = "bob.test@test.com",
+                Created = DateTime.UtcNow
+            });
 
             return savedAnswer;
         }
