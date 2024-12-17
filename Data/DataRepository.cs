@@ -81,6 +81,33 @@ namespace backend.Data
             }
         }
 
+        public IEnumerable<QuestionGetManyResponse> GetQuestionsWithAnswers()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var questionDictionary = new Dictionary<int, QuestionGetManyResponse>();
+                return connection.Query<QuestionGetManyResponse, AnswerGetResponse, QuestionGetManyResponse>(
+                    "EXEC dbo.Question_GetMany_WithAnswers",
+                    map: (q, a) =>
+                    {
+                        QuestionGetManyResponse? question;
+
+                        if(!questionDictionary.TryGetValue(q.QuestionId, out question))
+                        {
+                            question = q;
+                            question.Answers = new List<AnswerGetResponse>();
+                            questionDictionary.Add(question.QuestionId, question);
+                        }
+                        question.Answers.Add(a);
+                        return question;
+                    }, splitOn: "QuestionId")
+                    .Distinct()
+                    .ToList();
+            }
+        }
+
         public IEnumerable<QuestionGetManyResponse> GetUnansweredQuestions()
         {
             using (var connection = new SqlConnection(_connectionString))
