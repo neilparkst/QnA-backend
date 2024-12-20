@@ -14,6 +14,8 @@ namespace backend.Data
 
         IEnumerable<QuestionGetManyResponse> GetUnansweredQuestions();
 
+        Task<IEnumerable<QuestionGetManyResponse>> GetUnansweredQuestionsAsync();
+
         QuestionGetSingleResponse GetQuestion(int questionId);
 
         bool QuestionExists(int questionId);

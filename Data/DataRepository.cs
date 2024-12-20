@@ -141,6 +141,15 @@ namespace backend.Data
             }
         }
 
+        public async Task<IEnumerable<QuestionGetManyResponse>> GetUnansweredQuestionsAsync()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                return await connection.QueryAsync<QuestionGetManyResponse>("EXEC dbo.Question_GetUnanswered");
+            }
+        }
+
         public AnswerGetResponse PostAnswer(AnswerPostFullRequest answer)
         {
             using ( var connection = new SqlConnection(_connectionString))
