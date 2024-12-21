@@ -18,6 +18,11 @@ namespace backend
             builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
             builder.Services.AddScoped<IDataRepository, DataRepository>();
+            builder.Services.AddMemoryCache(options =>
+            {
+                options.SizeLimit = 100;
+            });
+            builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
 
             var app = builder.Build();
 
