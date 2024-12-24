@@ -2,6 +2,7 @@ namespace backend
 {
     using backend.Data;
     using DbUp;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
 
     public class Program
     {
@@ -17,12 +18,24 @@ namespace backend
             builder.Services.AddSwaggerGen();
             builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+            // Add custom dependency injection
             builder.Services.AddScoped<IDataRepository, DataRepository>();
+            builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
             builder.Services.AddMemoryCache(options =>
             {
                 options.SizeLimit = 100;
             });
-            builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
+
+            // Add JWT authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = builder.Configuration["Auth0:Authority"];
+                options.Audience = builder.Configuration["Auth0:Audience"];
+            });
 
             var app = builder.Build();
 
@@ -55,7 +68,7 @@ namespace backend
                 app.UseHttpsRedirection();
             }
 
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
