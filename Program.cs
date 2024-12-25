@@ -1,8 +1,10 @@
 namespace backend
 {
+    using backend.Authorization;
     using backend.Data;
     using DbUp;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Authorization;
 
     public class Program
     {
@@ -36,6 +38,13 @@ namespace backend
                 options.Authority = builder.Configuration["Auth0:Authority"];
                 options.Audience = builder.Configuration["Auth0:Audience"];
             });
+
+            // Add authorization policy
+            builder.Services.AddAuthorization(options =>
+                options.AddPolicy("MustBeQuestionAuthor", policy =>
+                    policy.Requirements.Add(new MustBeQuestionAuthorRequirement())));
+            builder.Services.AddScoped<IAuthorizationHandler, MustBeQuestionAuthorHandler>();
+            builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
 
