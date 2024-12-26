@@ -39,6 +39,9 @@ namespace backend
                 options.Audience = builder.Configuration["Auth0:Audience"];
             });
 
+            // Add HttpClient dependency injection for making HTTP requests
+            builder.Services.AddHttpClient();
+
             // Add authorization policy
             builder.Services.AddAuthorization(options =>
                 options.AddPolicy("MustBeQuestionAuthor", policy =>

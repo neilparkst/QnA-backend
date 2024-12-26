@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using backend.Data;
 using backend.Data.Models;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace backend.Controllers
 {
@@ -13,10 +15,19 @@ namespace backend.Controllers
         private readonly IDataRepository _dataRepository;
         private readonly IQuestionCache _cache;
 
-        public QuestionsController(IDataRepository dataRepository, IQuestionCache questionCache)
+        private readonly IHttpClientFactory _clientFactory;
+        private readonly string _auth0UserInfo;
+
+        public QuestionsController(
+            IDataRepository dataRepository,
+            IQuestionCache questionCache,
+            IHttpClientFactory clientFactory,
+            IConfiguration configuration)
         {
             _dataRepository = dataRepository;
             _cache = questionCache;
+            _clientFactory = clientFactory;
+            _auth0UserInfo = $"{configuration["Auth0:Authority"]}userinfo";
         }
 
         [HttpGet]
@@ -64,14 +75,20 @@ namespace backend.Controllers
 
         [Authorize]
         [HttpPost]
-        public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostRequest questionPostRequest)
+        public async Task<ActionResult<QuestionGetSingleResponse>> PostQuestion(QuestionPostRequest questionPostRequest)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var savedQuestion = _dataRepository.PostQuestion(new QuestionPostFullRequest
             {
                 Title = questionPostRequest.Title,
                 Content = questionPostRequest.Content,
-                UserId = "1",
-                UserName = "bob.test@test.com",
+                UserId = userId,
+                UserName = await GetUserName(),
                 Created = DateTime.UtcNow
             });
 
@@ -116,25 +133,54 @@ namespace backend.Controllers
 
         [Authorize]
         [HttpPost("{questionId}/answer")]
-        public ActionResult<AnswerGetResponse> PostAnswer(int questionId, AnswerPostRequest answerPostRequest)
+        public async Task<ActionResult<AnswerGetResponse>> PostAnswer(int questionId, AnswerPostRequest answerPostRequest)
         {
             var questionExists = _dataRepository.QuestionExists(questionId);
             if (!questionExists)
             {
                 return NotFound();
             }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var savedAnswer = _dataRepository.PostAnswer(new AnswerPostFullRequest
             {
                 QuestionId = questionId,
                 Content = answerPostRequest.Content,
-                UserId = "1",
-                UserName = "bob.test@test.com",
+                UserId = userId,
+                UserName = await GetUserName(),
                 Created = DateTime.UtcNow
             });
 
             _cache.Remove(questionId);
 
             return savedAnswer;
+        }
+
+        private async Task<string> GetUserName()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, _auth0UserInfo);
+            request.Headers.Add("Authorization", Request.Headers["Authorization"].First());
+
+            var client = _clientFactory.CreateClient();
+
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<User>(jsonContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return user?.Name ?? "";
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 }
