@@ -20,6 +20,15 @@ namespace backend
             builder.Services.AddSwaggerGen();
             builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+            // Add CORS services
+            builder.Services.AddCors(options =>
+                options.AddPolicy("CorsPolicy", policy =>
+                    policy.AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .WithOrigins(builder.Configuration["Frontend"])
+                )
+            );
+
             // Add custom dependency injection
             builder.Services.AddScoped<IDataRepository, DataRepository>();
             builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
@@ -79,6 +88,8 @@ namespace backend
             {
                 app.UseHttpsRedirection();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();
