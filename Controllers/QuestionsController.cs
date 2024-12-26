@@ -62,7 +62,7 @@ namespace backend.Controllers
             return question;
         }
 
-        [Authorize(Policy = "MustBeQuestionAuthor")]
+        [Authorize]
         [HttpPost]
         public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostRequest questionPostRequest)
         {
@@ -98,7 +98,7 @@ namespace backend.Controllers
             return savedQuestion;
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustBeQuestionAuthor")]
         [HttpDelete("{questionId}")]
         public ActionResult DeleteQuestion(int questionId)
         {
