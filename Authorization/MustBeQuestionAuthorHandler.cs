@@ -43,7 +43,7 @@ namespace backend.Authorization
                 return;
             }
 
-            var question = await _dataRepository.GetQuestionAsync(questionIdAsInt);
+            var question = await _dataRepository.GetQuestion(questionIdAsInt);
             if (question == null)
             {
                 // let it through so that the controller can return a 404
