@@ -20,6 +20,9 @@ namespace backend
             builder.Services.AddSwaggerGen();
             builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+            // Add Environment variables
+            builder.Configuration.AddEnvironmentVariables();
+
             // Add CORS services
             builder.Services.AddCors(options =>
                 options.AddPolicy("CorsPolicy", policy =>
