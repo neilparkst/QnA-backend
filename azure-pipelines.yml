@@ -19,3 +19,20 @@ steps:
     version: '6.0'
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'backend build'
+- script: dotnet test
+  displayName: 'backend tests'
+- script: dotnet publish -c $(buildConfiguration) --self-contained true -r win-x86
+  displayName: 'backend publish'
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'bin/Release/net6.0/win-x86/publish'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'backend zip files'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'backend'
+  displayName: 'backend publish to pipeline'
