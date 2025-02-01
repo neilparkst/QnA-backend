@@ -36,22 +36,17 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'backend'
   displayName: 'backend publish to pipeline'
-- task: DownloadBuildArtifacts@1
-  inputs:
-    downloadPath: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'backend'
-  displayName: 'download artifact'
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Azure subscription 1(1)(ed6a1963-4709-4400-b953-d13f2a7996f6)'
     appType: 'webApp'
     WebAppName: 'qna2025-backend-stage'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Azure subscription 1(1)(ed6a1963-4709-4400-b953-d13f2a7996f6)'
     appType: 'webApp'
     WebAppName: 'qna2025-backend'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
